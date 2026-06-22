@@ -1,0 +1,84 @@
+/* 1. NEW BACKGROUND GRADIENT FROM YOUR PICTURE */
+.stApp {
+    background: linear-gradient(135deg, #0e131f 20%, #222d42 45%, #991b1b 75%, #fed7aa 100%) !important;
+    background-attachment: fixed !important;
+    color: #f8fafc !important;
+}
+
+/* Blend the sidebar smoothly with the new deep dark blue tones */
+[data-testid="stSidebar"] {
+    background-color: rgba(14, 19, 31, 0.9) !important;
+    border-right: 1px solid rgba(254, 215, 170, 0.1);
+}
+
+/* Ensure the main text container stays readable over the background wave */
+.main .block-container {
+    position: relative;
+    z-index: 2; /* Forces text to sit in front of the wave */
+}
+
+/* 2. LARGE BACKGROUND SOUNDWAVE LAYER */
+.soundwave-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 300px; /* Much taller area for impact */
+    width: 100%;
+    
+    /* Absolute background positioning behind all elements */
+    position: absolute;
+    top: 50px;
+    left: 0;
+    z-index: 1; /* Sits behind the text container */
+    pointer-events: none; /* Allows you to click "through" the wave onto buttons */
+    opacity: 0.45; /* Softened so it doesn't overpower the foreground text */
+}
+
+/* Main wave bars - updated to high-contrast neon coral/crimson */
+.soundwave-bar {
+    width: 6px; /* Wider bars for a bigger look */
+    height: 15px;
+    background: #00f2fe; /* High-contrast bright cyan/blue */
+    border-radius: 3px;
+    /* Soft electric blue and white glow mix to pierce through the background */
+    box-shadow: 0 0 20px #00a2ff, 0 0 4px #fff;
+    animation: fluidWave 1.6s ease-in-out infinite;
+}
+
+/* Staggered fluid delays for the large wave pulse */
+.soundwave-bar:nth-child(1), .soundwave-bar:nth-child(13) { animation-delay: 0.1s; }
+.soundwave-bar:nth-child(2), .soundwave-bar:nth-child(12) { animation-delay: 0.4s; }
+.soundwave-bar:nth-child(3), .soundwave-bar:nth-child(11) { animation-delay: 0.7s; }
+.soundwave-bar:nth-child(4), .soundwave-bar:nth-child(10) { animation-delay: 0.3s; }
+.soundwave-bar:nth-child(5), .soundwave-bar:nth-child(9)  { animation-delay: 0.9s; }
+.soundwave-bar:nth-child(6), .soundwave-bar:nth-child(8)  { animation-delay: 0.5s; }
+.soundwave-bar:nth-child(7) { animation-delay: 1.1s; } /* Main center peak delay */
+
+/* Large fluid scaling loop */
+@keyframes fluidWave {
+    0%, 100% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(12); /* Drastically larger vertical range */
+    }
+}
+
+/* Hide the Fork and GitHub elements in the top right corner */
+.stAppHeader a[href*="github.com"], 
+.stAppHeader [data-testid="stHeaderActionButton"] {
+    display: none !important;
+}
+
+/* Style the main title and adjust emoji presentation */
+h1 {
+    font-size: 2.5rem !important; /* Adjusts overall text size */
+}
+
+/* Target emojis inside the title if they render as images/spans */
+h1 span, h1 img {
+    font-size: 1.5em !important; /* Scale emoji size relative to text */
+    vertical-align: middle !important; /* Align it nicely with text */
+    margin-right: 10px; /* Space it out from the text */
+}
