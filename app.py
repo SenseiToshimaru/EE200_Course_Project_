@@ -18,30 +18,56 @@ if os.path.exists("style.css"):
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 st.title("Apollo 🪉 SoNg SeaRch")
 
-st.markdown("""
-<div class="soundwave-container">
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-    <div class="soundwave-bar"></div>
-</div>
-""", unsafe_allow_html=True)
+
 
 # Connect to database
 conn = init_db()
 
 # Sidebar
+# Sidebar
 st.sidebar.header("App Modes")
 mode = st.sidebar.radio("Select Mode:", ["Single-Clip Mode", "Batch Mode", "Database Management"])
+
+
+st.sidebar.divider()
+st.sidebar.header("🎵 Available Songs")
+
+# Fetch current songs from database
+existing_songs = get_db_stats(conn)
+
+if existing_songs:
+    # Initialize session state to track currently playing song
+    if "current_playing" not in st.session_state:
+        st.session_state.current_playing = None
+
+    for song in sorted(existing_songs):
+        # Create a button for each song. Clicking toggles or switches it.
+        if st.sidebar.button(f"▶️ {song}", key=f"play_{song}", use_container_width=True):
+            if st.session_state.current_playing == song:
+                st.session_state.current_playing = None  # Turn off if clicked again
+            else:
+                st.session_state.current_playing = song  # Play this song / switch song
+            st.rerun()
+
+    # Audio player interface
+    if st.session_state.current_playing:
+        st.sidebar.markdown(f"**Now Playing:** {st.session_state.current_playing}")
+        
+        # Look for matching file types in local directory
+        possible_extensions = ['.wav', '.mp3']
+        audio_file_path = None
+        for ext in possible_extensions:
+            test_path = f"{st.session_state.current_playing}{ext}"
+            if os.path.exists(test_path):
+                audio_file_path = test_path
+                break
+        
+        if audio_file_path:
+            st.sidebar.audio(audio_file_path, autoplay=True)
+        else:
+            st.sidebar.error("Audio source file not found in directory.")
+else:
+    st.sidebar.write("No songs indexed yet.")
 
 def save_uploaded_file(uploaded_file):
     """Saves Streamlit uploaded file to disk temporarily for Librosa to read."""
@@ -49,11 +75,12 @@ def save_uploaded_file(uploaded_file):
     
     with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
         tmp.write(uploaded_file.getvalue())
-        return tmp.name
+        return tmp.name    
+
 
 # MODE 1: Database Management
 if mode == "Database Management":
-    st.header("🗄️ Database Management")
+    st.header("Database Management")
 
     existing_songs = get_db_stats(conn)
     
@@ -70,8 +97,6 @@ if mode == "Database Management":
     
     st.divider()
 
-    st.write("Upload the 50 provided songs here to build your local SQLite database.")
-    
     uploaded_files = st.file_uploader("Upload database songs", accept_multiple_files=True, type=['wav', 'mp3'])
     if st.button("Build Database"):
         if uploaded_files:
@@ -90,7 +115,7 @@ if mode == "Database Management":
 
 # MODE 2: Single-Clip Mode
 elif mode == "Single-Clip Mode":
-    st.header("🔍 Single-Clip Identifier")
+    st.header("Please Upload Single File")
     query_file = st.file_uploader("Upload a short query clip", key="single", type=['wav', 'mp3'])
     
     if query_file and st.button("Identify Song"):
@@ -143,7 +168,7 @@ elif mode == "Single-Clip Mode":
 
 # MODE 3: Batch Mode
 elif mode == "Batch Mode":
-    st.header("📂 Batch Processing")
+    st.header("Batch Processing")
     st.write("Upload multiple query clips. The app will generate a `results.csv` file exactly as required.")
     
     batch_files = st.file_uploader("Upload batch queries", accept_multiple_files=True, key="batch", type=['wav', 'mp3'])
@@ -160,7 +185,7 @@ elif mode == "Batch Mode":
             if best_match == "No confident match found":
                 best_match = "Unknown"
                 
-            results.append({"filename": file.name, "prediction": best_match})
+            results.append({"Input File": file.name, "Matched Song Name": best_match})
             os.remove(tmp_path)
             
             progress_bar.progress((i + 1) / len(batch_files))
@@ -170,12 +195,16 @@ elif mode == "Batch Mode":
             
         # Creating Dataframe 
         df = pd.DataFrame(results)
-        csv = df.to_csv(index=False)
         
+        # Display the results as an interactive Streamlit table
+        st.subheader("Batch Match Results")
+        st.dataframe(df, use_container_width=True)
+        
+        csv = df.to_csv(index=False)
         st.success("Batch processing complete!")
         st.download_button(
-            label="Download results.csv",
+            label="Download Results as CSV",
             data=csv,
-            file_name='results.csv',
-            mime='text/csv',
+            file_name="results.csv",
+            mime="text/csv"
         )
