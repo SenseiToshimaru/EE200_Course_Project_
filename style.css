@@ -43,7 +43,7 @@ div.stButton > button, div.stDownloadButton > button {
 /* Change the color of upload text in the file uploader to black */
 [data-testid="stFileUploader"] section [data-testid="stMarkdownContainer"] p,
 [data-testid="stFileUploader"] section small {
-    color: #4393f5 !important;
+    color: #ea5e22 !important;
 }
 
 /* Change file uploader internal details text to white */

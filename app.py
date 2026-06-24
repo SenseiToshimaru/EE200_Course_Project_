@@ -85,15 +85,15 @@ if mode == "Database Management":
     existing_songs = get_db_stats(conn)
     
     col1, col2 = st.columns([1, 2])
-    with col1:
-        st.metric(label="Songs Indexed", value=len(existing_songs))
-    with col2:
-        with st.expander("👀 View Indexed Songs"):
-            if existing_songs:
-                for song in sorted(existing_songs):
-                    st.write(f"🎵 {song}")
-            else:
-                st.write("Database is empty.")
+    # with col1:
+    #     st.metric(label="Songs Indexed", value=len(existing_songs))
+    # with col2:
+    #     with st.expander("👀 View Indexed Songs"):
+    #         if existing_songs:
+    #             for song in sorted(existing_songs):
+    #                 st.write(f"🎵 {song}")
+    #         else:
+    #             st.write("Database is empty.")
     
     st.divider()
 
